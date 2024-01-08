@@ -7,53 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const getChannelStats = asyncHandler(async (req, res) => {
-    // TODO: Get the channel stats like total video views, total subscribers, total videos, total likes etc.
 
-    // const stats = await Subscription.aggregate([
-    //     {
-    //         $match: {
-    //             channel: new mongoose.Types.ObjectId(req.user._id),
-    //         },
-    //     },
-    //     {
-    //         $group: {
-    //             _id: "$channel",
-    //             subscribers: {
-    //                 $push: "$subscriber", // subscriber list
-    //             },
-    //         },
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: "videos",
-    //             localField: "_id",
-    //             foreignField: "owner",
-    //             as: "videos",
-    //         },
-    //     },
-    //     {
-    //         $unwind: "$videos",
-    //     },
-    //     {
-    //         $group: {
-    //             _id: "$_id",
-    //             subscribers: {
-    //                 $first: "$subscribers",
-    //             },
-    //             videosList: {
-    //                 $push: "$videos",
-    //             },
-    //         },
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: "likes",
-    //             localField: "videosList._id",
-    //             foreignField: "video",
-    //             as: "likes",
-    //         },
-    //     },
-    // ]);
     const stats = await Subscription.aggregate([
         {
             $match: {
