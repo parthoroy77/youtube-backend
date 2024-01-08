@@ -11,10 +11,13 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid video");
     }
 
-    const existingLikeInVideo = await Like.findOne({ video: videoId });
+    const existingLikeInVideo = await Like.findOne({
+        video: videoId,
+        likedBy: req.user._id,
+    });
 
-    if (existingLike) {
-        await Like.findByIdAndDelete(existingLike._id);
+    if (existingLikeInVideo) {
+        await Like.findByIdAndDelete(existingLikeInVideo._id);
         return res.status(200).json(new ApiResponse(200, {}, "Like Removed"));
     }
 
@@ -40,7 +43,10 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid Comment");
     }
 
-    const existingLikeInComment = await Like.findOne({ comment: commentId });
+    const existingLikeInComment = await Like.findOne({
+        comment: commentId,
+        likedBy: req.user._id,
+    });
 
     if (existingLikeInComment) {
         await Like.findByIdAndDelete(existingLikeInComment._id);
@@ -73,7 +79,10 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid Tweet");
     }
 
-    const existingLikeInTweet = await Like.findOne({ tweet: tweetId });
+    const existingLikeInTweet = await Like.findOne({
+        tweet: tweetId,
+        likedBy: req.user._id,
+    });
 
     if (existingLikeInTweet) {
         await Like.findByIdAndDelete(existingLikeInTweet._id);
@@ -128,9 +137,9 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         },
         {
             $project: {
-                likedVideos: 1
-            }
-        }
+                likedVideos: 1,
+            },
+        },
     ]);
 
     if (!allLikedVideos) {
