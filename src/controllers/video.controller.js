@@ -8,7 +8,64 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
-    //TODO: get all videos based on query, sort, pagination
+
+    const skipCount = (page - 1) * limit;
+
+    let queryObject = {};
+
+    if (query) {
+        queryObject.title = { $regex: query, $options: "i" };
+    }
+
+    if (userId) {
+        if (query) {
+            queryObject.$or = [
+                { title: { $regex: query, $options: "i" } },
+                { owner: new mongoose.Types.ObjectId(userId) },
+            ];
+        } else {
+            queryObject.owner = new mongoose.Types.ObjectId(userId);
+        }
+    }
+
+    let sortObject = {};
+
+    if (sortBy) {
+        sortObject[sortBy] = sortType === "desc" ? -1 : 1;
+    }
+
+    const aggregate = Video.aggregate([
+        {
+            $match: queryObject,
+        },
+        {
+            $sort: sortObject,
+        },
+        {
+            $skip: skipCount,
+        },
+        {
+            $limit: parseInt(limit),
+        },
+    ]);
+
+    try {
+        const getVideos = await Video.aggregatePaginate(aggregate, {
+            limit: parseInt(limit),
+            page: parseInt(page),
+        });
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(200, getVideos, "Video Fetched Successfully")
+            );
+    } catch (error) {
+        throw new ApiError(
+            500,
+            "Something went wrong while getting videos",
+            error.message
+        );
+    }
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -52,7 +109,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(400, video, "Video Uploaded Successfully"));
+        .json(new ApiResponse(200, video, "Video Uploaded Successfully"));
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
